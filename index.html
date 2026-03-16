@@ -397,7 +397,8 @@ async function loadData() {
     const lastFuente = (lastDatedRow && lastDatedRow[6]) ? lastDatedRow[6] : 'Claude AI';
 
     // Pipe rows = rows with new structured format: TICKER | TIPO | precio | motivo | confianza
-    const pipeRows = rows.filter(r => r[2] && r[2].includes('|') && r[2].trim().substring(0,12).includes('|'));
+    const TICKERS = ['AAPL','MSFT','ITX','SAN','SPY','IWDA','EUR/USD','GBP/USD'];
+    const pipeRows = rows.filter(r => r[2] && TICKERS.some(t => r[2].trim().startsWith(t + ' |') || r[2].trim().startsWith(t + '|')));
     const lastSignal = pipeRows.map(r => r[2]).join('\n');
 
     document.getElementById('statLast').textContent = lastDate;

@@ -389,7 +389,7 @@ async function loadData() {
 
     document.getElementById('statTotal').textContent = rows.length;
 
-    const last = rows[rows.length - 1];
+    const last = [...rows].reverse().find(r => r[2] && r[2].trim().length > 10) || rows[rows.length - 1];
     const lastDate = formatDate(last[0]);
     const lastSignal = last[2] || '';
     const lastFuente = last[6] || 'Claude AI';

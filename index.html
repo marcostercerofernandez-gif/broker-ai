@@ -380,7 +380,7 @@ async function loadData() {
     const res = await fetch(SHEET_URL);
     const text = await res.text();
     const all = parseCSV(text);
-    const rows = all.slice(1).filter(r => r.length > 1 && r[0]);
+    const rows = all.slice(1).filter(r => r.length > 1 && r.some(f => f && f.trim()));
 
     if (!rows.length) {
       document.getElementById('analysisText').innerHTML = '<em style="color:var(--muted)">No hay datos todavía. El sistema ejecutará el primer análisis mañana a las 08:30.</em>';

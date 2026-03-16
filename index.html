@@ -211,6 +211,52 @@
     .main-grid { grid-template-columns:1fr; }
     .signal-grid { grid-template-columns:1fr 1fr; }
   }
+
+  /* ── PORTFOLIO SECTION ─────────────────────────────── */
+  .portfolio-section { margin-bottom: 20px; }
+  .portfolio-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .portfolio-summary { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+  .port-stat { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 18px; box-shadow:var(--shadow); position:relative; overflow:hidden; }
+  .port-stat::before { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:linear-gradient(90deg, var(--gold), transparent); opacity:0.4; }
+  .port-stat-label { font-size:10px; color:var(--muted); font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px; }
+  .port-stat-val { font-size:22px; font-weight:700; font-family:'Playfair Display',serif; }
+  .port-stat-sub { font-size:10px; color:var(--muted); margin-top:3px; font-family:'IBM Plex Mono',monospace; }
+  .positive { color: var(--green); }
+  .negative { color: var(--red); }
+
+  /* Position table */
+  .positions-table { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; box-shadow:var(--shadow); margin-bottom:14px; }
+  .positions-table table { width:100%; border-collapse:collapse; }
+  .positions-table th { font-size:10px; color:var(--muted); font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:.1em; padding:11px 16px; text-align:left; border-bottom:1px solid var(--border); background:var(--surface2); }
+  .positions-table td { padding:12px 16px; font-size:12px; border-bottom:1px solid var(--border); font-family:'IBM Plex Mono',monospace; }
+  .positions-table tr:last-child td { border-bottom:none; }
+  .positions-table tr:hover td { background:var(--surface2); }
+  .ticker-cell { font-weight:700; font-family:'Playfair Display',serif; font-size:14px; color:var(--text); }
+  .pnl-positive { color:var(--green); font-weight:600; }
+  .pnl-negative { color:var(--red); font-weight:600; }
+  .del-btn { background:none; border:1px solid var(--border); color:var(--muted); padding:3px 8px; border-radius:5px; cursor:pointer; font-size:10px; font-family:'IBM Plex Mono',monospace; transition:all .2s; }
+  .del-btn:hover { border-color:var(--red); color:var(--red); }
+
+  /* Add position form */
+  .add-position-card { background:var(--surface); border:1px solid var(--border2); border-radius:14px; padding:20px; box-shadow:var(--shadow); }
+  .add-position-title { font-size:10px; color:var(--muted); font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:.1em; margin-bottom:14px; }
+  .add-form { display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:10px; align-items:end; }
+  .form-group label { font-size:10px; color:var(--muted); font-family:'IBM Plex Mono',monospace; text-transform:uppercase; letter-spacing:.08em; display:block; margin-bottom:5px; }
+  .form-group select, .form-group input { width:100%; background:var(--bg); border:1.5px solid var(--border2); color:var(--text); padding:8px 10px; border-radius:8px; font-size:12px; font-family:'IBM Plex Mono',monospace; outline:none; transition:border-color .2s; }
+  .form-group select:focus, .form-group input:focus { border-color:var(--accent); }
+  .add-btn { background:linear-gradient(135deg,var(--accent),var(--gold)); color:white; border:none; padding:9px 18px; border-radius:8px; font-size:11px; font-family:'IBM Plex Mono',monospace; cursor:pointer; font-weight:600; letter-spacing:0.05em; transition:opacity .2s; white-space:nowrap; }
+  .add-btn:hover { opacity:0.88; }
+
+  /* Mini chart bars */
+  .sparkline { display:flex; align-items:flex-end; gap:2px; height:24px; }
+  .spark-bar { width:4px; border-radius:1px; background:var(--gold); opacity:0.6; transition:opacity .2s; }
+  .spark-bar:hover { opacity:1; }
+
+  @media(max-width:700px) {
+    .portfolio-summary { grid-template-columns:1fr 1fr; }
+    .add-form { grid-template-columns:1fr 1fr; }
+  }
+
 </style>
 </head>
 <body>
@@ -305,6 +351,99 @@
       </div>
     </div>
   </div>
+
+
+  <!-- ══ PORTFOLIO SECTION ══════════════════════════════ -->
+  <div class="portfolio-section">
+    <div class="portfolio-header">
+      <div class="card-title" style="font-size:11px;color:var(--text)">💼 Cartera simulada · Rentabilidad diaria</div>
+      <button class="refresh-btn" onclick="refreshPrices()" id="refreshPricesBtn">↻ Actualizar precios</button>
+    </div>
+
+    <!-- Summary stats -->
+    <div class="portfolio-summary">
+      <div class="port-stat">
+        <div class="port-stat-label">Capital invertido</div>
+        <div class="port-stat-val" id="portTotal">—</div>
+        <div class="port-stat-sub">Total simulado</div>
+      </div>
+      <div class="port-stat">
+        <div class="port-stat-label">Valor actual</div>
+        <div class="port-stat-val" id="portValue">—</div>
+        <div class="port-stat-sub">A precios de hoy</div>
+      </div>
+      <div class="port-stat">
+        <div class="port-stat-label">P&L total</div>
+        <div class="port-stat-val" id="portPnl">—</div>
+        <div class="port-stat-sub" id="portPnlPct">—</div>
+      </div>
+      <div class="port-stat">
+        <div class="port-stat-label">P&L hoy</div>
+        <div class="port-stat-val" id="portDaily">—</div>
+        <div class="port-stat-sub">Variación del día</div>
+      </div>
+    </div>
+
+    <!-- Positions table -->
+    <div class="positions-table">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+        <div class="card-title">Posiciones abiertas</div>
+        <div style="font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace" id="lastPriceUpdate"></div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Activo</th>
+            <th>Acciones</th>
+            <th>Precio compra</th>
+            <th>Precio actual</th>
+            <th>Invertido</th>
+            <th>Valor actual</th>
+            <th>P&L</th>
+            <th>P&L hoy</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="positionsBody">
+          <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px;font-family:'IBM Plex Mono',monospace;font-size:12px">Añade tu primera posición abajo ↓</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Add position -->
+    <div class="add-position-card">
+      <div class="add-position-title">➕ Añadir posición simulada</div>
+      <div class="add-form">
+        <div class="form-group">
+          <label>Activo</label>
+          <select id="newTicker">
+            <option value="AAPL">AAPL — Apple</option>
+            <option value="MSFT">MSFT — Microsoft</option>
+            <option value="ITX">ITX — Inditex</option>
+            <option value="SAN">SAN — Santander</option>
+            <option value="SPY">SPY — S&P 500 ETF</option>
+            <option value="IWDA">IWDA — MSCI World</option>
+            <option value="EURUSD">EUR/USD</option>
+            <option value="GBPUSD">GBP/USD</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nº acciones</label>
+          <input type="number" id="newShares" placeholder="10" min="0.01" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Precio compra ($)</label>
+          <input type="number" id="newBuyPrice" placeholder="150.00" min="0.01" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Fecha compra</label>
+          <input type="date" id="newDate">
+        </div>
+        <button class="add-btn" onclick="addPosition()">+ Añadir</button>
+      </div>
+    </div>
+  </div>
+  <!-- ══════════════════════════════════════════════════ -->
 
   <!-- History table -->
   <div class="table-wrap">
@@ -510,6 +649,158 @@ async function loadFearGreed() {
     document.getElementById('gaugeLabel').style.color = color;
   } catch(e) { console.log('Fear & Greed no disponible'); }
 }
+
+
+// ══ PORTFOLIO ENGINE ════════════════════════════════════════
+const FINNHUB_KEY = 'd6rtb21r01qrri55fsb0d6rtb21r01qrri55fsb0';
+
+const PRICE_SOURCES = {
+  AAPL:   () => `https://finnhub.io/api/v1/quote?symbol=AAPL&token=${FINNHUB_KEY}`,
+  MSFT:   () => `https://finnhub.io/api/v1/quote?symbol=MSFT&token=${FINNHUB_KEY}`,
+  SPY:    () => `https://finnhub.io/api/v1/quote?symbol=SPY&token=${FINNHUB_KEY}`,
+  ITX:    () => `https://query1.finance.yahoo.com/v8/finance/chart/ITX.MC`,
+  SAN:    () => `https://query1.finance.yahoo.com/v8/finance/chart/SAN.MC`,
+  IWDA:   () => `https://query1.finance.yahoo.com/v8/finance/chart/IWDA.AS`,
+  EURUSD: () => `https://query1.finance.yahoo.com/v8/finance/chart/EURUSD=X`,
+  GBPUSD: () => `https://query1.finance.yahoo.com/v8/finance/chart/GBPUSD=X`,
+};
+
+let liveprices = {};
+let positions = JSON.parse(localStorage.getItem('broker_ai_positions') || '[]');
+
+function savePositions() {
+  localStorage.setItem('broker_ai_positions', JSON.stringify(positions));
+}
+
+async function fetchPrice(ticker) {
+  try {
+    const url = PRICE_SOURCES[ticker]();
+    const res = await fetch(url);
+    const data = await res.json();
+    if (ticker === 'AAPL' || ticker === 'MSFT' || ticker === 'SPY') {
+      return { current: parseFloat(data.c), prev: parseFloat(data.pc) };
+    } else {
+      const meta = data.chart?.result?.[0]?.meta;
+      return { current: parseFloat(meta?.regularMarketPrice), prev: parseFloat(meta?.previousClose) };
+    }
+  } catch(e) { return null; }
+}
+
+async function refreshPrices() {
+  const btn = document.getElementById('refreshPricesBtn');
+  btn.textContent = '⟳ Cargando...';
+  btn.disabled = true;
+
+  const tickers = [...new Set(positions.map(p => p.ticker))];
+  await Promise.all(tickers.map(async t => {
+    const price = await fetchPrice(t);
+    if (price) liveprices[t] = price;
+  }));
+
+  renderPortfolio();
+  document.getElementById('lastPriceUpdate').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-ES');
+  btn.textContent = '↻ Actualizar precios';
+  btn.disabled = false;
+}
+
+function fmt(n) {
+  if (isNaN(n) || n === null) return '—';
+  return '$' + n.toLocaleString('es-ES', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtPct(n) {
+  if (isNaN(n) || n === null) return '—';
+  return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+}
+
+function renderPortfolio() {
+  if (!positions.length) {
+    document.getElementById('positionsBody').innerHTML =
+      '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px;font-family:IBM Plex Mono,monospace;font-size:12px">Añade tu primera posición abajo ↓</td></tr>';
+    document.getElementById('portTotal').textContent = '—';
+    document.getElementById('portValue').textContent = '—';
+    document.getElementById('portPnl').textContent = '—';
+    document.getElementById('portDaily').textContent = '—';
+    return;
+  }
+
+  let totalInvested = 0, totalValue = 0, totalDailyPnl = 0;
+
+  const rows = positions.map((p, i) => {
+    const price = liveprices[p.ticker];
+    const currentPrice = price?.current || p.buyPrice;
+    const prevClose = price?.prev || p.buyPrice;
+
+    const invested = p.shares * p.buyPrice;
+    const value = p.shares * currentPrice;
+    const pnl = value - invested;
+    const pnlPct = (pnl / invested) * 100;
+    const dailyPnl = p.shares * (currentPrice - prevClose);
+    const dailyPct = ((currentPrice - prevClose) / prevClose) * 100;
+
+    totalInvested += invested;
+    totalValue += value;
+    totalDailyPnl += dailyPnl;
+
+    const pnlClass = pnl >= 0 ? 'pnl-positive' : 'pnl-negative';
+    const dailyClass = dailyPnl >= 0 ? 'pnl-positive' : 'pnl-negative';
+
+    return `<tr>
+      <td><span class="ticker-cell">${p.ticker}</span><br><span style="font-size:10px;color:var(--muted)">${p.date || ''}</span></td>
+      <td>${p.shares}</td>
+      <td>${fmt(p.buyPrice)}</td>
+      <td>${price ? fmt(currentPrice) : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${fmt(invested)}</td>
+      <td>${price ? fmt(value) : '—'}</td>
+      <td class="${pnlClass}">${price ? fmt(pnl) : '—'}<br><span style="font-size:10px">${price ? fmtPct(pnlPct) : ''}</span></td>
+      <td class="${dailyClass}">${price ? fmt(dailyPnl) : '—'}<br><span style="font-size:10px">${price ? fmtPct(dailyPct) : ''}</span></td>
+      <td><button class="del-btn" onclick="deletePosition(${i})">✕</button></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('positionsBody').innerHTML = rows;
+
+  const totalPnl = totalValue - totalInvested;
+  const totalPnlPct = totalInvested > 0 ? (totalPnl / totalInvested) * 100 : 0;
+  const totalDailyPct = totalInvested > 0 ? (totalDailyPnl / totalInvested) * 100 : 0;
+
+  document.getElementById('portTotal').textContent = fmt(totalInvested);
+  document.getElementById('portValue').textContent = fmt(totalValue);
+  document.getElementById('portPnl').innerHTML = `<span class="${totalPnl >= 0 ? 'positive' : 'negative'}">${fmt(totalPnl)}</span>`;
+  document.getElementById('portPnlPct').textContent = fmtPct(totalPnlPct);
+  document.getElementById('portDaily').innerHTML = `<span class="${totalDailyPnl >= 0 ? 'positive' : 'negative'}">${fmt(totalDailyPnl)}</span>`;
+}
+
+function addPosition() {
+  const ticker = document.getElementById('newTicker').value;
+  const shares = parseFloat(document.getElementById('newShares').value);
+  const buyPrice = parseFloat(document.getElementById('newBuyPrice').value);
+  const date = document.getElementById('newDate').value;
+
+  if (!ticker || isNaN(shares) || shares <= 0 || isNaN(buyPrice) || buyPrice <= 0) {
+    alert('Completa todos los campos correctamente.');
+    return;
+  }
+
+  positions.push({ ticker, shares, buyPrice, date });
+  savePositions();
+  document.getElementById('newShares').value = '';
+  document.getElementById('newBuyPrice').value = '';
+  renderPortfolio();
+  refreshPrices();
+}
+
+function deletePosition(i) {
+  if (confirm('¿Eliminar esta posición?')) {
+    positions.splice(i, 1);
+    savePositions();
+    renderPortfolio();
+  }
+}
+
+// Init portfolio on load
+renderPortfolio();
+if (positions.length > 0) refreshPrices();
+// ══════════════════════════════════════════════════════════════
 
 loadData();
 loadFearGreed();

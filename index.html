@@ -156,6 +156,7 @@
   .badge-compra { background:var(--green-bg); color:var(--green); border:1px solid rgba(26,102,64,0.2); }
   .badge-venta { background:var(--red-bg); color:var(--red); border:1px solid rgba(139,26,26,0.2); }
   .badge-atencion { background:var(--amber-bg); color:var(--amber); border:1px solid rgba(122,80,0,0.2); }
+  .badge-mantener { background:rgba(42,90,139,0.08); color:#2a5a8b; border:1px solid rgba(42,90,139,0.2); }
   .badge-neutral { background:var(--surface2); color:var(--muted); border:1px solid var(--border); }
   .signal-conf { font-size:10px; color:var(--muted); margin-top:7px; font-family:'IBM Plex Mono',monospace; }
   .conf-bar { height:3px; background:var(--surface2); border-radius:2px; margin-top:4px; }
@@ -429,23 +430,38 @@ async function loadData() {
     }
 
     const badgeMap = {
-      COMPRA:   { cls:'badge-compra',   color:'#1a6640', label:'▲ COMPRA' },
-      VENTA:    { cls:'badge-venta',    color:'#8b1a1a', label:'▼ VENTA' },
+      COMPRA:    { cls:'badge-compra',   color:'#1a6640', label:'▲ COMPRA' },
+      VENTA:     { cls:'badge-venta',    color:'#8b1a1a', label:'▼ VENTA' },
+      MANTENER:  { cls:'badge-mantener', color:'#2a5a8b', label:'◆ MANTENER' },
       'ATENCIÓN':{ cls:'badge-atencion', color:'#7a5000', label:'⚠ ATENCIÓN' },
-      NEUTRAL:  { cls:'badge-neutral',  color:'#7a7060', label:'— NEUTRAL' },
+      NEUTRAL:   { cls:'badge-neutral',  color:'#7a7060', label:'— NEUTRAL' },
     };
+
+    function extractSignalData(text, ticker) {
+      const re = new RegExp(ticker + '\\s*\\|\\s*(COMPRA|VENTA|MANTENER|ATENCI[OÓ]N)\\s*\\|[^|]*\\|[^|]*\\|\\s*(\\d+)', 'i');
+      const m = text.match(re);
+      if (m) {
+        const tipo = m[1].toUpperCase().replace('ATENCION','ATENCIÓN');
+        return { tipo, conf: Math.min(100, parseInt(m[2])) };
+      }
+      const re2 = new RegExp(ticker + '\\s*\\|\\s*(COMPRA|VENTA|MANTENER|ATENCI[OÓ]N)', 'i');
+      const m2 = text.match(re2);
+      if (m2) return { tipo: m2[1].toUpperCase().replace('ATENCION','ATENCIÓN'), conf: null };
+      return { tipo: 'NEUTRAL', conf: null };
+    }
 
     const grid = document.getElementById('signalGrid');
     grid.innerHTML = assets.map(a => {
-      const tipo = detectSignal(lastSignal, a.ticker, a.name);
-      const { cls, color, label } = badgeMap[tipo];
-      const conf = tipo === 'NEUTRAL' ? 28 : Math.floor(Math.random() * 25) + 60;
+      const { tipo, conf: rawConf } = extractSignalData(lastSignal, a.ticker);
+      const badge = badgeMap[tipo] || badgeMap['NEUTRAL'];
+      const conf = rawConf !== null ? rawConf : (tipo === 'NEUTRAL' || tipo === 'MANTENER' ? 50 : Math.floor(Math.random() * 20) + 60);
+      const isReal = rawConf !== null;
       return `<div class="signal-card">
         <div class="signal-ticker">${a.ticker}</div>
         <div class="signal-name">${a.name}</div>
-        <div class="signal-badge ${cls}">${label}</div>
-        <div class="signal-conf">Confianza ${conf}%</div>
-        <div class="conf-bar"><div class="conf-fill" style="width:${conf}%;background:${color}"></div></div>
+        <div class="signal-badge ${badge.cls}">${badge.label}</div>
+        <div class="signal-conf">Confianza ${conf}%${isReal ? ' <span style="color:var(--accent);font-size:9px">·real</span>' : ''}</div>
+        <div class="conf-bar"><div class="conf-fill" style="width:${conf}%;background:${badge.color}"></div></div>
       </div>`;
     }).join('');
 

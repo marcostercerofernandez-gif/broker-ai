@@ -223,14 +223,14 @@
 
 <script>
 const SHEET_ID = '1HBb7AReVNb1Bv4OMJ6d0jWLEcyy2Z4WZATdVIl4rc7M';
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/1HBb7AReVNb1Bv4OMJ6d0jWLEcyy2Z4WZATdVI14rc7M/gviz/tq?tqx=out:json`;
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT7a4ynMYwL_wMLTZjl9qUu6h63FxTMf1skTOg82oRA1ksYQsZz9wbnxhFUFl8J4efT1Kw96ISPl5J1/pub?output=csv`;
 
 async function loadData() {
   try {
-    const res = await fetch(SHEET_URL);
-    const text = await res.text();
-    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
-    const rows = json.table.rows;
+const res = await fetch(SHEET_URL);
+const text = await res.text();
+const lines = text.trim().split('\n').slice(1);
+const rows = lines.map(line => ({c: line.split(',').map(v => ({v: v.replace(/^"|"$/g,'').trim()}))}));
 
     if (!rows || rows.length === 0) {
       document.getElementById('analysisText').textContent = 'No hay datos todavía. El sistema ejecutará el primer análisis mañana a las 08:30.';

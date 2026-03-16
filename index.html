@@ -394,9 +394,15 @@ async function loadData() {
     const lastDate = formatDate(lastDatedRow ? lastDatedRow[0] : '');
     const lastFuente = (lastDatedRow && lastDatedRow[6]) ? lastDatedRow[6] : 'Claude AI';
 
-    // Collect ALL rows that have signal content in col C (pipe format or long text)
-    // This handles Make splitting Claude's response into multiple rows
-    const signalRows = rows.filter(r => r[2] && r[2].trim().length > 10);
+    // Find index of last dated row (anchor of most recent analysis)
+    const lastDatedIdx = rows.reduce((acc, r, i) => r[0] && r[0].trim().length > 5 ? i : acc, -1);
+
+    // Use ONLY rows AFTER the last dated row (these are the new pipe-format rows)
+    const recentRows = lastDatedIdx >= 0 ? rows.slice(lastDatedIdx + 1) : [];
+    const recentSignalRows = recentRows.filter(r => r[2] && r[2].trim().length > 10);
+
+    // Fallback: if no recent rows found, use all rows with content
+    const signalRows = recentSignalRows.length > 0 ? recentSignalRows : rows.filter(r => r[2] && r[2].trim().length > 10);
     const lastSignal = signalRows.map(r => r[2]).join('\n');
 
     document.getElementById('statLast').textContent = lastDate;

@@ -347,6 +347,8 @@
           <div class="asset-row"><span class="asset-ticker">🌍 IWDA</span><span class="asset-name">MSCI World</span></div>
           <div class="asset-row"><span class="asset-ticker">💱 EUR/USD</span><span class="asset-name">Euro</span></div>
           <div class="asset-row"><span class="asset-ticker">💱 GBP/USD</span><span class="asset-name">Libra</span></div>
+          <div class="asset-row"><span class="asset-ticker">🇺🇸 NVDA</span><span class="asset-name">Nvidia</span></div>
+          <div class="asset-row"><span class="asset-ticker">🥇 GLD</span><span class="asset-name">Oro ETF</span></div>
         </div>
       </div>
     </div>
@@ -425,6 +427,8 @@
             <option value="IWDA">IWDA — MSCI World</option>
             <option value="EURUSD">EUR/USD</option>
             <option value="GBPUSD">GBP/USD</option>
+            <option value="NVDA">NVDA — Nvidia</option>
+            <option value="GLD">GLD — Oro ETF</option>
           </select>
         </div>
         <div class="form-group">
@@ -536,7 +540,7 @@ async function loadData() {
     const lastFuente = (lastDatedRow && lastDatedRow[6]) ? lastDatedRow[6] : 'Claude AI';
 
     // Pipe rows = rows with new structured format: TICKER | TIPO | precio | motivo | confianza
-    const TICKERS = ['AAPL','MSFT','ITX','SAN','SPY','IWDA','EUR/USD','GBP/USD'];
+    const TICKERS = ['AAPL','MSFT','ITX','SAN','SPY','IWDA','EUR/USD','GBP/USD','NVDA','GLD'];
     const pipeRows = rows.filter(r => r[2] && TICKERS.some(t => r[2].trim().startsWith(t + ' |') || r[2].trim().startsWith(t + '|')));
     const lastSignal = pipeRows.map(r => r[2]).join('\n');
 
@@ -560,6 +564,8 @@ async function loadData() {
       { ticker:'IWDA', name:'MSCI World' },
       { ticker:'EUR/USD', name:'Euro / Dólar' },
       { ticker:'GBP/USD', name:'Libra / Dólar' },
+      { ticker:'NVDA', name:'Nvidia' },
+      { ticker:'GLD', name:'Oro ETF' },
     ];
 
     function detectSignal(text, ticker, name) {
@@ -663,6 +669,8 @@ const PRICE_SOURCES = {
   IWDA:   () => `https://query1.finance.yahoo.com/v8/finance/chart/IWDA.AS`,
   EURUSD: () => `https://query1.finance.yahoo.com/v8/finance/chart/EURUSD=X`,
   GBPUSD: () => `https://query1.finance.yahoo.com/v8/finance/chart/GBPUSD=X`,
+  NVDA:   () => `https://finnhub.io/api/v1/quote?symbol=NVDA&token=${FINNHUB_KEY}`,
+  GLD:    () => `https://finnhub.io/api/v1/quote?symbol=GLD&token=${FINNHUB_KEY}`,
 };
 
 let liveprices = {};
@@ -677,7 +685,7 @@ async function fetchPrice(ticker) {
     const url = PRICE_SOURCES[ticker]();
     const res = await fetch(url);
     const data = await res.json();
-    if (ticker === 'AAPL' || ticker === 'MSFT' || ticker === 'SPY') {
+    if (['AAPL','MSFT','SPY','NVDA','GLD'].includes(ticker)) {
       return { current: parseFloat(data.c), prev: parseFloat(data.pc) };
     } else {
       const meta = data.chart?.result?.[0]?.meta;

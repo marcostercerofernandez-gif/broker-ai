@@ -380,24 +380,25 @@ async function loadData() {
     const res = await fetch(SHEET_URL);
     const text = await res.text();
     const all = parseCSV(text);
-    const rows = all.slice(1).filter(r => r.length > 1 && r.some(f => f && f.trim()));
+    // Skip header row; keep ALL rows that have any content
+    const rows = all.slice(1).filter(r => r.some(f => f && f.trim()));
 
     if (!rows.length) {
-      document.getElementById('analysisText').innerHTML = '<em style="color:var(--muted)">No hay datos todavía. El sistema ejecutará el primer análisis mañana a las 08:30.</em>';
+      document.getElementById('analysisText').innerHTML = '<em style="color:var(--muted)">No hay datos todavía.</em>';
       return;
     }
 
-    document.getElementById('statTotal').textContent = rows.length;
+    // Dated rows = rows with a date in col A (these anchor each analysis session)
+    const datedRows = rows.filter(r => r[0] && r[0].trim().length > 5);
+    document.getElementById('statTotal').textContent = datedRows.length;
 
-    // Find last row with a real date (that's the anchor of the latest analysis)
-    const lastDatedRow = [...rows].reverse().find(r => r[0] && r[0].trim().length > 5);
+    const lastDatedRow = datedRows[datedRows.length - 1];
     const lastDate = formatDate(lastDatedRow ? lastDatedRow[0] : '');
     const lastFuente = (lastDatedRow && lastDatedRow[6]) ? lastDatedRow[6] : 'Claude AI';
 
-    // Only use rows with pipe-format (new Claude structured output: TICKER | TIPO | ...)
-    const pipeRows = rows.filter(r => r[2] && r[2].includes('|') && /^[A-Z\/]+\s*\|/.test(r[2].trim()));
-    const signalRows = pipeRows.length > 0 ? pipeRows : rows.filter(r => r[2] && r[2].trim().length > 10);
-    const lastSignal = signalRows.map(r => r[2]).join('\n');
+    // Pipe rows = rows with new structured format: TICKER | TIPO | precio | motivo | confianza
+    const pipeRows = rows.filter(r => r[2] && /^[A-Z\/]{2,7}\s*\|/.test(r[2].trim()));
+    const lastSignal = pipeRows.map(r => r[2]).join('\n');
 
     document.getElementById('statLast').textContent = lastDate;
     document.getElementById('lastUpdate').textContent = lastDate;

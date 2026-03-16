@@ -223,8 +223,16 @@
 
 <script>
 const SHEET_ID = '1HBb7AReVNb1Bv4OMJ6d0jWLEcyy2Z4WZATdVIl4rc7M';
-https://docs.google.com/spreadsheets/d/e/2PACX-1vT7a4ynMYwL_wMLTZjl9qUu6h63FxTMf1skTOg82oRA1ksYQsZz9wbnxhFUFl8J4efT1Kw96ISPl5J1/pub?gid=0&single=true&output=csv
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/1HBb7AReVNb1Bv4OMJ6d0jWLEcyy2Z4WZATdVI14rc7M/export?format=csv&gid=0`;
+```
 
+Esta usa `/export` en lugar de `/pub` — funciona siempre que el Sheet esté compartido como **"Cualquiera con el enlace puede ver"** (que ya lo pusiste antes).
+
+---
+
+Primero verifica abriendo esta URL en el navegador:
+```
+https://docs.google.com/spreadsheets/d/1HBb7AReVNb1Bv4OMJ6d0jWLEcyy2Z4WZATdVI14rc7M/export?format=csv&gid=0
 async function loadData() {
   try {
 const res = await fetch(SHEET_URL);

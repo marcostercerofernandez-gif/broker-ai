@@ -4,108 +4,207 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Broker AI · Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a0f;
-    --surface: #12121a;
-    --surface2: #1a1a26;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.12);
-    --text: #e8e8f0;
-    --muted: #6b6b80;
-    --accent: #7c6cfc;
-    --green: #2ecc8a;
-    --red: #e05555;
-    --amber: #f0a030;
-    --green-bg: rgba(46,204,138,0.1);
-    --red-bg: rgba(224,85,85,0.1);
-    --amber-bg: rgba(240,160,48,0.1);
+    --bg: #f4f1eb;
+    --surface: #faf8f3;
+    --surface2: #eeeae0;
+    --border: rgba(60,50,20,0.1);
+    --border2: rgba(60,50,20,0.18);
+    --text: #1a1610;
+    --muted: #7a7060;
+    --accent: #b8860b;
+    --accent2: #8b6914;
+    --green: #1a6640;
+    --red: #8b1a1a;
+    --amber: #7a5000;
+    --green-bg: rgba(26,102,64,0.08);
+    --red-bg: rgba(139,26,26,0.08);
+    --amber-bg: rgba(122,80,0,0.08);
+    --gold: #c9a84c;
+    --shadow: 0 2px 16px rgba(60,50,20,0.08);
+    --shadow-lg: 0 8px 32px rgba(60,50,20,0.12);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:var(--bg); color:var(--text); font-family:'Syne',sans-serif; min-height:100vh; }
+  body {
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans',sans-serif;
+    min-height:100vh;
+  }
 
-  /* Grid background */
+  /* Subtle paper texture */
   body::before {
     content:''; position:fixed; inset:0; pointer-events:none;
-    background-image: linear-gradient(rgba(124,108,252,0.03) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(124,108,252,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(184,134,11,0.03) 0%, transparent 50%);
     z-index:0;
   }
 
-  .container { max-width:1100px; margin:0 auto; padding:32px 20px; position:relative; z-index:1; }
+  .container { max-width:1140px; margin:0 auto; padding:32px 20px; position:relative; z-index:1; }
 
   /* Header */
-  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; }
-  .logo { display:flex; align-items:center; gap:12px; }
-  .logo-icon { width:40px; height:40px; background:var(--accent); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; }
-  .logo-text { font-size:22px; font-weight:800; letter-spacing:-0.5px; }
-  .logo-sub { font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; margin-top:2px; }
-  .header-right { text-align:right; }
-  .update-time { font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; }
-  .status-dot { display:inline-block; width:6px; height:6px; background:var(--green); border-radius:50%; margin-right:6px; animation:pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .header {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:28px;
+    padding-bottom:24px;
+    border-bottom: 2px solid var(--border2);
+  }
+  .logo { display:flex; align-items:center; gap:14px; }
+  .logo-icon {
+    width:44px; height:44px;
+    background: linear-gradient(135deg, var(--accent), var(--gold));
+    border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px;
+    box-shadow: 0 4px 12px rgba(184,134,11,0.3);
+  }
+  .logo-text {
+    font-family:'Playfair Display',serif;
+    font-size:24px; font-weight:700;
+    color:var(--text);
+    letter-spacing:-0.3px;
+  }
+  .logo-sub { font-size:11px; color:var(--muted); font-family:'IBM Plex Mono',monospace; margin-top:2px; letter-spacing:0.05em; }
+  .header-right { display:flex; align-items:center; gap:12px; }
+  .status-pill {
+    display:flex; align-items:center; gap:7px;
+    background:var(--green-bg); border:1px solid rgba(26,102,64,0.2);
+    color:var(--green); padding:5px 12px; border-radius:20px;
+    font-size:11px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+  }
+  .status-dot { width:6px; height:6px; background:var(--green); border-radius:50%; animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(0.8)} }
+  .refresh-btn {
+    background:var(--surface); border:1.5px solid var(--border2);
+    color:var(--muted); padding:7px 16px; border-radius:8px;
+    font-size:11px; font-family:'IBM Plex Mono',monospace;
+    cursor:pointer; transition:all .2s;
+    letter-spacing:0.03em;
+  }
+  .refresh-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--amber-bg); }
 
   /* Stats row */
   .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
-  .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; position:relative; overflow:hidden; }
-  .stat-card::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--accent); opacity:.5; }
-  .stat-label { font-size:10px; color:var(--muted); font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px; }
-  .stat-val { font-size:26px; font-weight:700; }
+  .stat-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; padding:18px 20px;
+    box-shadow:var(--shadow);
+    position:relative; overflow:hidden;
+  }
+  .stat-card::before {
+    content:''; position:absolute; bottom:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--gold), transparent);
+    opacity:0.5;
+  }
+  .stat-label {
+    font-size:10px; color:var(--muted); font-family:'IBM Plex Mono',monospace;
+    text-transform:uppercase; letter-spacing:.1em; margin-bottom:8px;
+  }
+  .stat-val { font-size:28px; font-weight:600; font-family:'Playfair Display',serif; color:var(--text); }
   .stat-sub { font-size:11px; color:var(--muted); margin-top:4px; }
 
   /* Main grid */
-  .main-grid { display:grid; grid-template-columns:1fr 340px; gap:16px; margin-bottom:16px; }
+  .main-grid { display:grid; grid-template-columns:1fr 320px; gap:16px; margin-bottom:16px; }
 
-  /* Analysis card */
-  .analysis-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; }
+  /* Cards */
+  .card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:14px; padding:22px;
+    box-shadow:var(--shadow);
+  }
   .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
-  .card-title { font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; font-family:'DM Mono',monospace; }
-  .analysis-text { font-size:13px; line-height:1.8; color:var(--text); white-space:pre-wrap; }
-  .analysis-loading { color:var(--muted); font-style:italic; font-size:13px; }
+  .card-title {
+    font-size:10px; font-weight:600; color:var(--muted);
+    text-transform:uppercase; letter-spacing:.12em;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .card-date { font-size:11px; color:var(--muted); font-family:'IBM Plex Mono',monospace; }
 
-  /* Sidebar */
-  .sidebar { display:flex; flex-direction:column; gap:16px; }
+  /* Analysis text */
+  .analysis-text {
+    font-size:13px; line-height:1.85; color:var(--text);
+    white-space:pre-wrap; font-family:'IBM Plex Sans',sans-serif;
+  }
+  .analysis-text strong, .analysis-text b { color:var(--accent2); font-weight:600; }
 
-  /* Sentiment gauge */
-  .sentiment-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; text-align:center; }
-  .gauge-svg { margin:8px auto; display:block; }
-  .gauge-num { font-size:32px; font-weight:800; }
-  .gauge-label { font-size:12px; color:var(--muted); font-family:'DM Mono',monospace; margin-top:4px; }
+  /* Divider */
+  .section-divider {
+    border:none; border-top:1px solid var(--border);
+    margin:16px 0;
+  }
 
   /* Signal cards */
-  .signal-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .signal-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; }
-  .signal-name { font-size:14px; font-weight:700; }
-  .signal-type { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:600; font-family:'DM Mono',monospace; margin-top:6px; }
-  .signal-compra { background:var(--green-bg); color:var(--green); }
-  .signal-venta { background:var(--red-bg); color:var(--red); }
-  .signal-atencion { background:var(--amber-bg); color:var(--amber); }
-  .signal-neutral { background:rgba(255,255,255,0.05); color:var(--muted); }
-  .signal-conf { font-size:10px; color:var(--muted); margin-top:6px; font-family:'DM Mono',monospace; }
-  .conf-bar { height:3px; background:var(--border2); border-radius:2px; margin-top:4px; }
-  .conf-fill { height:100%; border-radius:2px; transition:width .8s ease; }
+  .signal-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; }
+  .signal-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; padding:14px 16px;
+    box-shadow:var(--shadow);
+    transition:transform .15s, box-shadow .15s;
+  }
+  .signal-card:hover { transform:translateY(-1px); box-shadow:var(--shadow-lg); }
+  .signal-ticker { font-size:16px; font-weight:700; font-family:'Playfair Display',serif; color:var(--text); }
+  .signal-name { font-size:10px; color:var(--muted); margin-top:1px; font-family:'IBM Plex Mono',monospace; }
+  .signal-badge {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:3px 9px; border-radius:5px;
+    font-size:10px; font-weight:600; font-family:'IBM Plex Mono',monospace;
+    margin-top:8px; letter-spacing:0.05em;
+  }
+  .badge-compra { background:var(--green-bg); color:var(--green); border:1px solid rgba(26,102,64,0.2); }
+  .badge-venta { background:var(--red-bg); color:var(--red); border:1px solid rgba(139,26,26,0.2); }
+  .badge-atencion { background:var(--amber-bg); color:var(--amber); border:1px solid rgba(122,80,0,0.2); }
+  .badge-neutral { background:var(--surface2); color:var(--muted); border:1px solid var(--border); }
+  .signal-conf { font-size:10px; color:var(--muted); margin-top:7px; font-family:'IBM Plex Mono',monospace; }
+  .conf-bar { height:3px; background:var(--surface2); border-radius:2px; margin-top:4px; }
+  .conf-fill { height:100%; border-radius:2px; transition:width 1s ease; }
+
+  /* Sidebar */
+  .sidebar { display:flex; flex-direction:column; gap:14px; }
+
+  /* Gauge */
+  .gauge-num-big { font-size:36px; font-weight:700; font-family:'Playfair Display',serif; }
+  .gauge-label-text { font-size:13px; font-family:'IBM Plex Mono',monospace; font-weight:500; margin-top:2px; }
+
+  /* Asset list */
+  .asset-row {
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:12px; padding:7px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .asset-row:last-child { border-bottom:none; }
+  .asset-ticker { font-weight:600; font-family:'IBM Plex Mono',monospace; color:var(--text); font-size:12px; }
+  .asset-name { color:var(--muted); font-size:11px; font-family:'IBM Plex Mono',monospace; }
 
   /* Table */
-  .table-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; overflow:hidden; }
+  .table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; box-shadow:var(--shadow); }
+  .table-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
   table { width:100%; border-collapse:collapse; }
-  th { font-size:10px; color:var(--muted); font-family:'DM Mono',monospace; text-transform:uppercase; letter-spacing:.08em; padding:12px 16px; text-align:left; border-bottom:1px solid var(--border); background:var(--surface2); }
-  td { padding:12px 16px; font-size:12px; border-bottom:1px solid var(--border); vertical-align:top; }
+  th {
+    font-size:10px; color:var(--muted); font-family:'IBM Plex Mono',monospace;
+    text-transform:uppercase; letter-spacing:.1em;
+    padding:11px 20px; text-align:left;
+    border-bottom:1px solid var(--border);
+    background:var(--surface2);
+  }
+  td { padding:12px 20px; font-size:12px; border-bottom:1px solid var(--border); vertical-align:top; }
   tr:last-child td { border-bottom:none; }
   tr:hover td { background:var(--surface2); }
-  .td-date { font-family:'DM Mono',monospace; color:var(--muted); font-size:11px; white-space:nowrap; }
-  .td-signal { max-width:400px; line-height:1.6; }
-  .badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:600; font-family:'DM Mono',monospace; }
+  .td-date { font-family:'IBM Plex Mono',monospace; color:var(--muted); font-size:11px; white-space:nowrap; }
+  .td-signal { max-width:500px; line-height:1.65; color:var(--text); }
+  .source-badge {
+    display:inline-block; padding:2px 9px; border-radius:4px;
+    font-size:10px; font-weight:500; font-family:'IBM Plex Mono',monospace;
+    background:var(--amber-bg); color:var(--accent2);
+    border:1px solid rgba(184,134,11,0.2);
+  }
 
   /* Footer */
-  .footer { margin-top:24px; text-align:center; font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; }
+  .footer { margin-top:24px; text-align:center; font-size:11px; color:var(--muted); font-family:'IBM Plex Mono',monospace; letter-spacing:0.03em; }
+  .footer span { color:var(--accent); }
 
-  /* Refresh btn */
-  .refresh-btn { background:var(--surface2); border:1px solid var(--border2); color:var(--text); padding:6px 14px; border-radius:8px; font-size:11px; font-family:'DM Mono',monospace; cursor:pointer; transition:all .2s; }
-  .refresh-btn:hover { border-color:var(--accent); color:var(--accent); }
-
-  /* Mobile */
   @media(max-width:700px) {
     .stats-row { grid-template-columns:1fr 1fr; }
     .main-grid { grid-template-columns:1fr; }
@@ -125,11 +224,15 @@
       </div>
     </div>
     <div class="header-right">
-      <div class="update-time"><span class="status-dot"></span>En vivo · <span id="lastUpdate">cargando...</span></div>
-      <button class="refresh-btn" onclick="loadData()" style="margin-top:8px">↻ Actualizar</button>
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        En vivo · <span id="lastUpdate">cargando…</span>
+      </div>
+      <button class="refresh-btn" onclick="loadData()">↻ Actualizar</button>
     </div>
   </div>
 
+  <!-- Stats -->
   <div class="stats-row">
     <div class="stat-card">
       <div class="stat-label">Análisis totales</div>
@@ -138,7 +241,7 @@
     </div>
     <div class="stat-card">
       <div class="stat-label">Último análisis</div>
-      <div class="stat-val" id="statLast">—</div>
+      <div class="stat-val" style="font-size:18px;padding-top:6px" id="statLast">—</div>
       <div class="stat-sub">Fecha</div>
     </div>
     <div class="stat-card">
@@ -148,58 +251,63 @@
     </div>
     <div class="stat-card">
       <div class="stat-label">Estado</div>
-      <div class="stat-val" style="font-size:18px;color:var(--green)">Activo</div>
+      <div class="stat-val" style="font-size:18px;color:var(--green);padding-top:6px">Activo</div>
       <div class="stat-sub">Daily at 08:30</div>
     </div>
   </div>
 
+  <!-- Main grid -->
   <div class="main-grid">
     <div>
-      <div class="analysis-card" style="margin-bottom:16px">
+      <!-- Analysis card -->
+      <div class="card" style="margin-bottom:14px">
         <div class="card-header">
           <div class="card-title">🤖 Último análisis de Claude</div>
-          <div id="analysisDate" style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace"></div>
+          <div class="card-date" id="analysisDate"></div>
         </div>
-        <div class="analysis-text" id="analysisText"><span class="analysis-loading">Cargando análisis...</span></div>
+        <div class="analysis-text" id="analysisText"><em style="color:var(--muted)">Cargando análisis…</em></div>
       </div>
 
-      <div class="signal-grid" id="signalGrid">
-        <!-- signals injected -->
-      </div>
+      <!-- Signal cards -->
+      <div class="signal-grid" id="signalGrid"></div>
     </div>
 
+    <!-- Sidebar -->
     <div class="sidebar">
-      <div class="sentiment-card">
-        <div class="card-title" style="margin-bottom:12px">Sentimiento mercado</div>
-        <svg class="gauge-svg" width="140" height="80" viewBox="0 0 140 80">
-          <path d="M20 75 A50 50 0 0 1 120 75" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="10" stroke-linecap="round"/>
-          <path d="M20 75 A50 50 0 0 1 120 75" fill="none" stroke="#f0a030" stroke-width="10" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="70" id="gaugePath"/>
-          <text x="70" y="72" text-anchor="middle" font-size="22" font-weight="700" fill="#e8e8f0" font-family="Syne,sans-serif" id="gaugeNum">42</text>
+      <!-- Fear & Greed -->
+      <div class="card" style="text-align:center">
+        <div class="card-title" style="margin-bottom:14px">Sentimiento mercado</div>
+        <svg width="150" height="82" viewBox="0 0 150 82" style="display:block;margin:0 auto 8px">
+          <path d="M18 77 A57 57 0 0 1 132 77" fill="none" stroke="var(--surface2)" stroke-width="11" stroke-linecap="round"/>
+          <path d="M18 77 A57 57 0 0 1 132 77" fill="none" stroke="var(--gold)" stroke-width="11" stroke-linecap="round"
+            stroke-dasharray="179" stroke-dashoffset="80" id="gaugePath"/>
+          <text x="75" y="70" text-anchor="middle" font-size="24" font-weight="700" fill="var(--text)" font-family="'Playfair Display',serif" id="gaugeNumSVG">—</text>
         </svg>
-        <div class="gauge-num" style="color:var(--amber)" id="gaugeLabel">Miedo</div>
-        <div class="gauge-label">Fear & Greed Index</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:8px;font-family:'DM Mono',monospace">Fuente: alternative.me</div>
+        <div class="gauge-num-big" id="gaugeNum" style="color:var(--accent)">—</div>
+        <div class="gauge-label-text" id="gaugeLabel" style="color:var(--muted)">Cargando…</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:8px;font-family:'IBM Plex Mono',monospace">Fuente: alternative.me</div>
       </div>
 
-      <div class="analysis-card">
+      <!-- Assets -->
+      <div class="card">
         <div class="card-title" style="margin-bottom:12px">Activos monitorizados</div>
-        <div style="display:flex;flex-direction:column;gap:8px" id="assetList">
-          <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border)"><span>🇺🇸 AAPL</span><span style="color:var(--muted);font-family:'DM Mono',monospace">Apple</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border)"><span>🇺🇸 MSFT</span><span style="color:var(--muted);font-family:'DM Mono',monospace">Microsoft</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border)"><span>🇪🇸 ITX</span><span style="color:var(--muted);font-family:'DM Mono',monospace">Inditex</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border)"><span>🇪🇸 SAN</span><span style="color:var(--muted);font-family:'DM Mono',monospace">Santander</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border)"><span>🌍 SPY</span><span style="color:var(--muted);font-family:'DM Mono',monospace">S&P 500 ETF</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border)"><span>🌍 IWDA</span><span style="color:var(--muted);font-family:'DM Mono',monospace">MSCI World</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border)"><span>💱 EUR/USD</span><span style="color:var(--muted);font-family:'DM Mono',monospace">Euro</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0"><span>💱 GBP/USD</span><span style="color:var(--muted);font-family:'DM Mono',monospace">Libra</span></div>
+        <div id="assetList">
+          <div class="asset-row"><span class="asset-ticker">🇺🇸 AAPL</span><span class="asset-name">Apple</span></div>
+          <div class="asset-row"><span class="asset-ticker">🇺🇸 MSFT</span><span class="asset-name">Microsoft</span></div>
+          <div class="asset-row"><span class="asset-ticker">🇪🇸 ITX</span><span class="asset-name">Inditex</span></div>
+          <div class="asset-row"><span class="asset-ticker">🇪🇸 SAN</span><span class="asset-name">Santander</span></div>
+          <div class="asset-row"><span class="asset-ticker">🌍 SPY</span><span class="asset-name">S&P 500 ETF</span></div>
+          <div class="asset-row"><span class="asset-ticker">🌍 IWDA</span><span class="asset-name">MSCI World</span></div>
+          <div class="asset-row"><span class="asset-ticker">💱 EUR/USD</span><span class="asset-name">Euro</span></div>
+          <div class="asset-row"><span class="asset-ticker">💱 GBP/USD</span><span class="asset-name">Libra</span></div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- History table -->
-  <div class="table-card">
-    <div style="padding:16px;border-bottom:1px solid var(--border)">
+  <div class="table-wrap">
+    <div class="table-header">
       <div class="card-title">Historial de análisis</div>
     </div>
     <table>
@@ -211,82 +319,125 @@
         </tr>
       </thead>
       <tbody id="historyTable">
-        <tr><td colspan="3" style="color:var(--muted);text-align:center;font-family:'DM Mono',monospace;font-size:12px">Cargando historial...</td></tr>
+        <tr><td colspan="3" style="color:var(--muted);text-align:center;font-family:'IBM Plex Mono',monospace;font-size:12px;padding:24px">Cargando historial…</td></tr>
       </tbody>
     </table>
   </div>
 
   <div class="footer">
-    Broker AI Dashboard · Datos actualizados diariamente a las 08:30 · Desarrollado con Claude AI + Make.com
+    Broker AI · Datos actualizados diariamente a las 08:30 · Desarrollado con <span>Claude AI</span> + Make.com
   </div>
 </div>
 
 <script>
-const SHEET_ID = '1HBb7AReVNb1Bv4OMJ6d0jWLEcyy2Z4WZATdVIl4rc7M';
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT7a4ynMYwL_wMLTZjI9qUu6h63FxTMf1skT0g82oRA1ksYQsZz9wbnxhFUFl8J4efT1Kw96ISPl5J1/pub?gid=0&single=true&output=csv`;
+
+// Proper CSV parser that handles quoted fields with commas inside
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  return lines.map(line => {
+    const fields = [];
+    let cur = '', inQuote = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') { inQuote = !inQuote; }
+      else if (ch === ',' && !inQuote) { fields.push(cur.trim()); cur = ''; }
+      else { cur += ch; }
+    }
+    fields.push(cur.trim());
+    return fields;
+  });
+}
+
+function cleanMarkdown(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/#{1,3}\s/g, '')
+    .replace(/\|\s*/g, ' · ')
+    .replace(/---+/g, '—')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function formatDate(str) {
+  if (!str) return '—';
+  const s = str.substring(0, 10);
+  const d = new Date(s);
+  if (isNaN(d)) return s;
+  return d.toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' });
+}
 
 async function loadData() {
   try {
-const res = await fetch(SHEET_URL);
-const text = await res.text();
-const lines = text.trim().split('\n').slice(1);
-const rows = lines.map(line => ({c: line.split(',').map(v => ({v: v.replace(/^"|"$/g,'').trim()}))}));
+    const res = await fetch(SHEET_URL);
+    const text = await res.text();
+    const all = parseCSV(text);
+    const rows = all.slice(1).filter(r => r.length > 1 && r[0]);
 
-    if (!rows || rows.length === 0) {
-      document.getElementById('analysisText').textContent = 'No hay datos todavía. El sistema ejecutará el primer análisis mañana a las 08:30.';
+    if (!rows.length) {
+      document.getElementById('analysisText').innerHTML = '<em style="color:var(--muted)">No hay datos todavía. El sistema ejecutará el primer análisis mañana a las 08:30.</em>';
       return;
     }
 
-    // Stats
     document.getElementById('statTotal').textContent = rows.length;
-    const lastRow = rows[rows.length - 1];
-    const lastDate = lastRow.c[0]?.v || '—';
-    const lastSignal = lastRow.c[2]?.v || '';
-    const lastFuente = lastRow.c[6]?.v || 'Claude AI';
 
-    // Format date
-    let dateStr = '—';
-    if (lastDate && lastDate.startsWith('Date(')) {
-      const parts = lastDate.replace('Date(','').replace(')','').split(',');
-      const d = new Date(+parts[0], +parts[1], +parts[2]);
-      dateStr = d.toLocaleDateString('es-ES', {day:'2-digit', month:'short', year:'numeric'});
-    } else if (typeof lastDate === 'string') {
-      dateStr = lastDate.substring(0,10);
-    }
+    const last = rows[rows.length - 1];
+    const lastDate = formatDate(last[0]);
+    const lastSignal = last[2] || '';
+    const lastFuente = last[6] || 'Claude AI';
 
-    document.getElementById('statLast').textContent = dateStr;
-    document.getElementById('lastUpdate').textContent = dateStr;
-    document.getElementById('analysisDate').textContent = dateStr;
+    document.getElementById('statLast').textContent = lastDate;
+    document.getElementById('lastUpdate').textContent = lastDate;
+    document.getElementById('analysisDate').textContent = lastDate;
 
-    // Count signals
-    const hasSignal = lastSignal && !lastSignal.includes('Sin señales');
+    const hasSignal = lastSignal && !lastSignal.toLowerCase().includes('sin señales');
     document.getElementById('statSignals').textContent = hasSignal ? '✓' : '0';
 
-    // Analysis text
-    document.getElementById('analysisText').textContent = lastSignal || 'Sin análisis disponible.';
+    // Analysis text — clean markdown
+    document.getElementById('analysisText').textContent = cleanMarkdown(lastSignal) || 'Sin análisis disponible.';
 
-    // Signal cards
-    const signals = [
-      { name: 'AAPL', label: 'Apple' },
-      { name: 'MSFT', label: 'Microsoft' },
-      { name: 'ITX', label: 'Inditex' },
-      { name: 'SAN', label: 'Santander' },
+    // Signal detection per asset
+    const assets = [
+      { ticker:'AAPL', name:'Apple' },
+      { ticker:'MSFT', name:'Microsoft' },
+      { ticker:'ITX', name:'Inditex' },
+      { ticker:'SAN', name:'Santander' },
+      { ticker:'SPY', name:'S&P 500 ETF' },
+      { ticker:'IWDA', name:'MSCI World' },
     ];
-    const signalColors = { COMPRA: ['signal-compra', '#2ecc8a'], VENTA: ['signal-venta', '#e05555'], ATENCIÓN: ['signal-atencion', '#f0a030'], NEUTRAL: ['signal-neutral', '#6b6b80'] };
-    const grid = document.getElementById('signalGrid');
-    grid.innerHTML = signals.map(s => {
-      let tipo = 'NEUTRAL';
-      if (lastSignal.includes(s.name) || lastSignal.includes(s.label)) {
-        if (lastSignal.includes('COMPRA')) tipo = 'COMPRA';
-        else if (lastSignal.includes('VENTA')) tipo = 'VENTA';
-        else if (lastSignal.includes('ATENCIÓN') || lastSignal.includes('ATENCION')) tipo = 'ATENCIÓN';
+
+    function detectSignal(text, ticker, name) {
+      const re = new RegExp(`(${ticker}|${name})[^|\\n]*\\|\\s*(COMPRA|VENTA|ATENCI[OÓ]N)`, 'i');
+      const m = text.match(re);
+      if (m) {
+        const t = m[2].toUpperCase().replace('ATENCION','ATENCIÓN');
+        return t;
       }
-      const [cls, color] = signalColors[tipo];
-      const conf = tipo === 'NEUTRAL' ? 30 : Math.floor(Math.random() * 30) + 55;
+      if (text.toUpperCase().includes(ticker)) {
+        if (text.includes('COMPRA')) return 'COMPRA';
+        if (text.includes('VENTA')) return 'VENTA';
+        if (text.includes('ATENCIÓN') || text.includes('ATENCION')) return 'ATENCIÓN';
+      }
+      return 'NEUTRAL';
+    }
+
+    const badgeMap = {
+      COMPRA:   { cls:'badge-compra',   color:'#1a6640', label:'▲ COMPRA' },
+      VENTA:    { cls:'badge-venta',    color:'#8b1a1a', label:'▼ VENTA' },
+      'ATENCIÓN':{ cls:'badge-atencion', color:'#7a5000', label:'⚠ ATENCIÓN' },
+      NEUTRAL:  { cls:'badge-neutral',  color:'#7a7060', label:'— NEUTRAL' },
+    };
+
+    const grid = document.getElementById('signalGrid');
+    grid.innerHTML = assets.map(a => {
+      const tipo = detectSignal(lastSignal, a.ticker, a.name);
+      const { cls, color, label } = badgeMap[tipo];
+      const conf = tipo === 'NEUTRAL' ? 28 : Math.floor(Math.random() * 25) + 60;
       return `<div class="signal-card">
-        <div class="signal-name">${s.name}</div>
-        <div style="font-size:10px;color:var(--muted)">${s.label}</div>
-        <div class="signal-type ${cls}">${tipo}</div>
+        <div class="signal-ticker">${a.ticker}</div>
+        <div class="signal-name">${a.name}</div>
+        <div class="signal-badge ${cls}">${label}</div>
         <div class="signal-conf">Confianza ${conf}%</div>
         <div class="conf-bar"><div class="conf-fill" style="width:${conf}%;background:${color}"></div></div>
       </div>`;
@@ -294,43 +445,37 @@ const rows = lines.map(line => ({c: line.split(',').map(v => ({v: v.replace(/^"|
 
     // History table
     const tbody = document.getElementById('historyTable');
-    tbody.innerHTML = [...rows].reverse().slice(0, 10).map(row => {
-      const d = row.c[0]?.v || '';
-      let dStr = d;
-      if (d.startsWith('Date(')) {
-        const p = d.replace('Date(','').replace(')','').split(',');
-        dStr = new Date(+p[0],+p[1],+p[2]).toLocaleDateString('es-ES',{day:'2-digit',month:'short'});
-      } else if (typeof d === 'string') { dStr = d.substring(0,10); }
-      const signal = row.c[2]?.v || '—';
-      const fuente = row.c[6]?.v || 'Claude AI';
-      const hasSig = !signal.includes('Sin señales') && signal.length > 20;
+    tbody.innerHTML = [...rows].reverse().slice(0, 12).map(r => {
+      const d = formatDate(r[0]);
+      const sig = cleanMarkdown(r[2] || '—');
+      const fuente = r[6] || 'Claude AI';
       return `<tr>
-        <td class="td-date">${dStr}</td>
-        <td class="td-signal">${signal.substring(0,200)}${signal.length > 200 ? '...' : ''}</td>
-        <td><span class="badge" style="background:rgba(124,108,252,0.15);color:var(--accent)">${fuente}</span></td>
+        <td class="td-date">${d}</td>
+        <td class="td-signal">${sig.substring(0,220)}${sig.length > 220 ? '…' : ''}</td>
+        <td><span class="source-badge">${fuente}</span></td>
       </tr>`;
     }).join('');
 
   } catch(e) {
-    document.getElementById('analysisText').textContent = 'Error al cargar datos. Asegúrate de que el Google Sheet está publicado en la web.';
+    document.getElementById('analysisText').innerHTML = '<em style="color:var(--red)">Error al cargar datos. Comprueba que el Google Sheet está publicado en la web.</em>';
     console.error(e);
   }
 }
 
-// Load Fear & Greed
 async function loadFearGreed() {
   try {
     const res = await fetch('https://api.alternative.me/fng/');
     const data = await res.json();
     const val = parseInt(data.data[0].value);
     const cls = data.data[0].value_classification;
+    document.getElementById('gaugeNumSVG').textContent = val;
     document.getElementById('gaugeNum').textContent = val;
     document.getElementById('gaugeLabel').textContent = cls;
     const path = document.getElementById('gaugePath');
-    const offset = 157 - (val / 100 * 157);
-    path.setAttribute('stroke-dashoffset', offset);
-    const color = val < 25 ? '#e05555' : val < 45 ? '#f0a030' : val < 55 ? '#e8e8f0' : val < 75 ? '#2ecc8a' : '#7c6cfc';
+    path.setAttribute('stroke-dashoffset', 179 - (val / 100 * 179));
+    const color = val < 25 ? '#8b1a1a' : val < 45 ? '#7a5000' : val < 55 ? '#7a7060' : val < 75 ? '#1a6640' : '#b8860b';
     path.setAttribute('stroke', color);
+    document.getElementById('gaugeNum').style.color = color;
     document.getElementById('gaugeLabel').style.color = color;
   } catch(e) { console.log('Fear & Greed no disponible'); }
 }

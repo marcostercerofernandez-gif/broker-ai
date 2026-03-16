@@ -389,10 +389,15 @@ async function loadData() {
 
     document.getElementById('statTotal').textContent = rows.length;
 
-    const last = [...rows].reverse().find(r => r[2] && r[2].trim().length > 10) || rows[rows.length - 1];
-    const lastDate = formatDate(last[0]);
-    const lastSignal = last[2] || '';
-    const lastFuente = last[6] || 'Claude AI';
+    // Find last row with a real date (that's the anchor of the latest analysis)
+    const lastDatedRow = [...rows].reverse().find(r => r[0] && r[0].trim().length > 5);
+    const lastDate = formatDate(lastDatedRow ? lastDatedRow[0] : '');
+    const lastFuente = (lastDatedRow && lastDatedRow[6]) ? lastDatedRow[6] : 'Claude AI';
+
+    // Collect ALL rows that have signal content in col C (pipe format or long text)
+    // This handles Make splitting Claude's response into multiple rows
+    const signalRows = rows.filter(r => r[2] && r[2].trim().length > 10);
+    const lastSignal = signalRows.map(r => r[2]).join('\n');
 
     document.getElementById('statLast').textContent = lastDate;
     document.getElementById('lastUpdate').textContent = lastDate;

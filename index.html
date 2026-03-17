@@ -474,7 +474,7 @@
 </div>
 
 <script>
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT7a4ynMYwL_wMLTZjI9qUu6h63FxTMf1skT0g82oRA1ksYQsZz9wbnxhFUFl8J4efT1Kw96ISPl5J1/pub?gid=0&single=true&output=csv&cachebust=${Date.now()}`;
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT7a4ynMYwL_wMLTZjI9qUu6h63FxTMf1skT0g82oRA1ksYQsZz9wbnxhFUFl8J4efT1Kw96ISPl5J1/pub?gid=0&single=true&output=csv`;
 
 // Full CSV parser: handles quoted fields with commas AND newlines inside
 function parseCSV(text) {
@@ -520,7 +520,7 @@ function formatDate(str) {
 
 async function loadData() {
   try {
-    const res = await fetch(SHEET_URL, {cache: 'no-store'});
+    const res = await fetch(SHEET_URL);
     const text = await res.text();
     const all = parseCSV(text);
     // Skip header row; keep ALL rows that have any content
@@ -539,9 +539,12 @@ async function loadData() {
     const lastDate = formatDate(lastDatedRow ? lastDatedRow[0] : '');
     const lastFuente = (lastDatedRow && lastDatedRow[6]) ? lastDatedRow[6] : 'Claude AI';
 
-    // Pipe rows = rows with new structured format: TICKER | TIPO | precio | motivo | confianza
+    // Find index of LAST dated row — pipe rows after it belong to most recent analysis
     const TICKERS = ['AAPL','MSFT','ITX','SAN','SPY','IWDA','EUR/USD','GBP/USD','NVDA','GLD'];
-    const pipeRows = rows.filter(r => r[2] && TICKERS.some(t => r[2].trim().startsWith(t + ' |') || r[2].trim().startsWith(t + '|')));
+    let lastDatedIdx = -1;
+    rows.forEach((r, i) => { if (r[0] && r[0].trim().length > 5) lastDatedIdx = i; });
+    const recentRows = lastDatedIdx >= 0 ? rows.slice(lastDatedIdx + 1) : rows;
+    const pipeRows = recentRows.filter(r => r[2] && TICKERS.some(t => r[2].trim().startsWith(t + ' |') || r[2].trim().startsWith(t + '|')));
     const lastSignal = pipeRows.map(r => r[2]).join('\n');
 
     document.getElementById('statLast').textContent = lastDate;

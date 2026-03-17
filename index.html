@@ -544,8 +544,11 @@ async function loadData() {
     let lastDatedIdx = -1;
     rows.forEach((r, i) => { if (r[0] && r[0].trim().length > 5) lastDatedIdx = i; });
     const recentRows = lastDatedIdx >= 0 ? rows.slice(lastDatedIdx + 1) : rows;
-    const pipeRows = recentRows.filter(r => r[2] && TICKERS.some(t => r[2].trim().startsWith(t + ' |') || r[2].trim().startsWith(t + '|')));
-    const lastSignal = pipeRows.map(r => r[2]).join('\n');
+    const pipeRows = recentRows.filter(r => {
+      const cell = (r[2] || r[0] || '').trim();
+      return TICKERS.some(t => cell.startsWith(t + ' |') || cell.startsWith(t + '|'));
+    });
+    const lastSignal = pipeRows.map(r => (r[2] || r[0] || '').trim()).join('\n');
 
     document.getElementById('statLast').textContent = lastDate;
     document.getElementById('lastUpdate').textContent = lastDate;
@@ -626,7 +629,7 @@ async function loadData() {
     const tbody = document.getElementById('historyTable');
     tbody.innerHTML = [...rows].reverse().slice(0, 12).map(r => {
       const d = formatDate(r[0]);
-      const sig = cleanMarkdown(r[2] || '—');
+      const sig = cleanMarkdown(r[2] || r[0] || '—');
       const fuente = r[6] || 'Claude AI';
       return `<tr>
         <td class="td-date">${d}</td>

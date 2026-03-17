@@ -539,16 +539,19 @@ async function loadData() {
     const lastDate = formatDate(lastDatedRow ? lastDatedRow[0] : '');
     const lastFuente = (lastDatedRow && lastDatedRow[6]) ? lastDatedRow[6] : 'Claude AI';
 
-    // Find index of LAST dated row — pipe rows after it belong to most recent analysis
+    // The analysis is stored as multiline text inside a single quoted CSV cell
+    // Find the most recent dated row and extract all pipe-format lines from it
     const TICKERS = ['AAPL','MSFT','ITX','SAN','SPY','IWDA','EUR/USD','GBP/USD','NVDA','GLD'];
-    let lastDatedIdx = -1;
-    rows.forEach((r, i) => { if (r[0] && r[0].trim().length > 5) lastDatedIdx = i; });
-    const recentRows = lastDatedIdx >= 0 ? rows.slice(lastDatedIdx + 1) : rows;
-    const pipeRows = recentRows.filter(r => {
-      const cell = (r[2] || r[0] || '').trim();
-      return TICKERS.some(t => cell.startsWith(t + ' |') || cell.startsWith(t + '|'));
+    const datedRowsAll = rows.filter(r => r[0] && r[0].trim().match(/^\d{4}/));
+    const latestRow = datedRowsAll[datedRowsAll.length - 1];
+    // Join all fields of the latest row and extract pipe lines
+    const fullText = latestRow ? latestRow.join(' ') : '';
+    const allLines = fullText.split('\n');
+    const pipeLines = allLines.filter(line => {
+      const t = line.trim();
+      return TICKERS.some(tk => t.startsWith(tk + ' |') || t.startsWith(tk + '|'));
     });
-    const lastSignal = pipeRows.map(r => (r[2] || r[0] || '').trim()).join('\n');
+    const lastSignal = pipeLines.join('\n');
 
     document.getElementById('statLast').textContent = lastDate;
     document.getElementById('lastUpdate').textContent = lastDate;

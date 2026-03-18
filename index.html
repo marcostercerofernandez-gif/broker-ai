@@ -691,16 +691,22 @@ function savePositions() {
 
 async function fetchPrice(ticker) {
   try {
-    const url = PRICE_SOURCES[ticker]();
-    const res = await fetch(url);
+    const url = PRICE_SOURCES[ticker]() + '&_=' + Date.now();
+    const res = await fetch(url, {cache: 'no-store', mode: 'cors'});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     if (['AAPL','MSFT','SPY','NVDA','GLD'].includes(ticker)) {
-      return { current: parseFloat(data.c), prev: parseFloat(data.pc) };
+      const c = parseFloat(data.c), pc = parseFloat(data.pc);
+      if (isNaN(c) || c === 0) throw new Error('Invalid price');
+      return { current: c, prev: pc };
     } else {
       const meta = data.chart?.result?.[0]?.meta;
-      return { current: parseFloat(meta?.regularMarketPrice), prev: parseFloat(meta?.previousClose) };
+      const c = parseFloat(meta?.regularMarketPrice);
+      const pc = parseFloat(meta?.previousClose);
+      if (isNaN(c) || c === 0) throw new Error('Invalid price');
+      return { current: c, prev: pc };
     }
-  } catch(e) { return null; }
+  } catch(e) { console.warn('Price fetch failed for', ticker, e.message); return null; }
 }
 
 async function refreshPrices() {

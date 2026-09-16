@@ -1,0 +1,5 @@
+# Secretos locales: nunca subir claves al repositorio
+.env
+.env.*
+!.env.example
+*.env
